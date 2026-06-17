@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from typing import Optional
+from services.query_builder import build_queries
 
 app = FastAPI(
     title="T3knosa — product image finder API",
@@ -11,3 +13,8 @@ app = FastAPI(
 @app.get("/")
 def home():
     return {"status": "ok"}
+
+
+@app.get("/queries")
+def queries(product: str, product_code: Optional[str] = None):
+    return {"queries": build_queries(product, product_code)}
