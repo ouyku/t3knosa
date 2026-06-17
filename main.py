@@ -2,10 +2,7 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
-@app.get("/")
-def home():
-    return {"message": "t3knosa"}
-    
+   
 product = "Nothing Headphone 1 B170"
 
 
@@ -17,7 +14,7 @@ def generate_queries(product):
     ]
 
 
-queries = generate_queries(product)
-
-for q in queries:
-    print(q)
+@app.get("/")
+def home():
+    return {"queries = generate_queries(product)"}
+ 
