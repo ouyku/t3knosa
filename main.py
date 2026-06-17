@@ -1,3 +1,11 @@
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def home():
+    return {"message": "t3knosa"}
+    
 product = "Nothing Headphone 1 B170"
 
 
