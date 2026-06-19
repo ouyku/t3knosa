@@ -16,5 +16,5 @@ def home():
 
 
 @app.get("/queries")
-def queries(product: str, product_code: Optional[str] = None):
-    return {"queries": build_queries(product, product_code)}
+def queries(product: str, product_code: Optional[str] = None, brand_site: Optional[str] = None):
+    return {"queries": build_queries(product, product_code, brand_site)}
