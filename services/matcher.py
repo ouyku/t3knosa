@@ -16,5 +16,9 @@ def score_result(title: str, product: str, product_code: Optional[str] = None) -
 
 
 # TODO: add product code match bonus
+#    if product_code and product_code.lower() in title_lower:
+        score += 0.4
 # TODO: add positive signals (official, press, spec)
+#score += 0.1
 # TODO: add negative signals (review, vs, alternative, clone)
+#score -= 0.2
