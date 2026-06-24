@@ -17,17 +17,24 @@ def score_result(title: str, product: str, product_code: Optional[str] = None) -
     if product_code and product_code.lower() in title_lower:
         score += 0.4
 
-    # positive signals — suggests official or press image
-    positive = ["official", "press", "product photo", "spec"]
+    # add positive signs
+    positive = ["official", "press", "product photo", "spec", "authentic"]
     for word in positive:
         if word in title_lower:
             score += 0.1
 
-    # negative signals — suggests wrong content type
-    negative = ["review", "vs", "alternative", "unboxing", "teardown", "clone"]
+    # add very negative signs
+    negative = ["unofficial", "replica", "imitation", "vs", "alternative", "teardown", "clone", "fake", "knockoff", "leak"]
     for word in negative:
         if word in title_lower:
             score -= 0.2
 
+    # add not the most ideal signs
+    notgood = ["unboxing", "review", "hands-on"]
+    for word in notgood:
+        if word in title_lower:
+            score -= 0.1
+
     # keep score between 0.0 and 1.0
     return round(min(max(score, 0.0), 1.0), 2)
+
