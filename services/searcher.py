@@ -23,6 +23,13 @@ def search_images(query: str) -> List[dict]:
     response = requests.get(SEARCH_URL, params=params)
     data = response.json()
 
-    # TODO: extract image_url, source_url, title from each result and return
-    pass
+    results = []
+    for item in data.get("items", []):
+        results.append({
+            "image_url": item.get("link"),
+            "source_url": item.get("image", {}).get("contextLink"),
+            "title": item.get("title")
+        })
+
+    return results
 
