@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from typing import Optional
 from services.query_builder import build_queries
+from services.searcher import search_images
+from services.matcher import score_result
+from models.schemas import SearchResponse, ImageResult
 
 app = FastAPI(
     title="T3knosa — product image finder API",
@@ -18,3 +21,15 @@ def home():
 @app.get("/queries")
 def queries(product: str, product_code: Optional[str] = None, brand_site: Optional[str] = None):
     return {"queries": build_queries(product, product_code, brand_site)}
+
+
+@app.get("/find-images", response_model=SearchResponse)
+def find_images(product: str, product_code: Optional[str] = None, brand_site: Optional[str] = None):
+    queries = build_queries(product, product_code, brand_site)
+
+    # TODO: call search_images for each query and collect results
+    # TODO: remove duplicate image_urls
+    # TODO: score each result and build ImageResult objects
+    # TODO: sort by confidence_score highest first
+    # TODO: return as SearchResponse
+    pass
