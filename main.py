@@ -27,7 +27,11 @@ def queries(product: str, product_code: Optional[str] = None, brand_site: Option
 def find_images(product: str, product_code: Optional[str] = None, brand_site: Optional[str] = None):
     queries = build_queries(product, product_code, brand_site)
 
-    # TODO: call search_images for each query and collect results
+    # call search_images for each query and collect results
+    raw_results = []
+    for query in queries:
+        raw_results += search_images(query)
+
     # TODO: remove duplicate image_urls
     # TODO: score each result and build ImageResult objects
     # TODO: sort by confidence_score highest first
