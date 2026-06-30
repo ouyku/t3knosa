@@ -32,7 +32,14 @@ def find_images(product: str, product_code: Optional[str] = None, brand_site: Op
     for query in queries:
         raw_results += search_images(query)
 
-    # TODO: remove duplicate image_urls
+    # remove duplicate image_urls
+    seen = set()
+    unique_results = []
+    for item in raw_results:
+        if item["image_url"] not in seen:
+            seen.add(item["image_url"])
+            unique_results.append(item)
+
     # TODO: score each result and build ImageResult objects
     # TODO: sort by confidence_score highest first
     # TODO: return as SearchResponse
