@@ -50,6 +50,12 @@ def find_images(product: str, product_code: Optional[str] = None, brand_site: Op
             confidence_score=score_result(item["title"], product, product_code)
         ))
 
-    # TODO: sort by confidence_score highest first
-    # TODO: return as SearchResponse
-    pass
+    # sort by confidence_score highest first
+    results.sort(key=lambda x: x.confidence_score, reverse=True)
+
+    # return as SearchResponse
+    return SearchResponse(
+        product=product,
+        product_code=product_code,
+        results=results
+    )
