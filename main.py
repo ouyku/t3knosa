@@ -40,7 +40,16 @@ def find_images(product: str, product_code: Optional[str] = None, brand_site: Op
             seen.add(item["image_url"])
             unique_results.append(item)
 
-    # TODO: score each result and build ImageResult objects
+    # score each result and build ImageResult objects
+    results = []
+    for item in unique_results:
+        results.append(ImageResult(
+            image_url=item["image_url"],
+            source_url=item["source_url"],
+            title=item["title"],
+            confidence_score=score_result(item["title"], product, product_code)
+        ))
+
     # TODO: sort by confidence_score highest first
     # TODO: return as SearchResponse
     pass
