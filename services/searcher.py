@@ -1,22 +1,20 @@
 import os
 import requests
 from dotenv import load_dotenv
-from typing import Optional, List
+from typing import List
 
 load_dotenv()  # reads the .env file and loads the keys into the environment
 
-API_KEY = os.getenv("GOOGLE_API_KEY")
-CX = os.getenv("GOOGLE_CX")
+SERPAPI_KEY = os.getenv("SERPAPI_KEY")
 
-SEARCH_URL = "https://www.googleapis.com/customsearch/v1"
+SEARCH_URL = "https://serpapi.com/search"
 
 
 def search_images(query: str) -> List[dict]:
     params = {
-        "key": API_KEY,
-        "cx": CX,
+        "api_key": SERPAPI_KEY,
+        "engine": "google_images",
         "q": query,
-        "searchType": "image",
         "num": 5
     }
 
@@ -24,12 +22,11 @@ def search_images(query: str) -> List[dict]:
     data = response.json()
 
     results = []
-    for item in data.get("items", []):
+    for item in data.get("images_results", []):
         results.append({
-            "image_url": item.get("link"),
-            "source_url": item.get("image", {}).get("contextLink"),
+            "image_url": item.get("original"),
+            "source_url": item.get("link"),
             "title": item.get("title")
         })
 
     return results
-
