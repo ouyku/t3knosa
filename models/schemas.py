@@ -7,9 +7,10 @@ from typing import Optional, List
 # shape of a single image result
 class ImageResult(BaseModel):
     image_url: str
-    source_url: str
+    source_url: Optional[str] = None
     title: str
     confidence_score: float  # 0.0 (low confidence) to 1.0 (high confidence)
+    is_generated: bool = False  # true if this image was AI-generated, not found online
 
 
 

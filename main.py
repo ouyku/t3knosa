@@ -3,7 +3,10 @@ from typing import Optional
 from services.query_builder import build_queries
 from services.searcher import search_images
 from services.matcher import score_result
+from services.generator import generate_image
 from models.schemas import SearchResponse, ImageResult
+
+GENERATE_THRESHOLD = 0.3  # auto-generate if best score is below this
 
 app = FastAPI(
     title="T3knosa — product image finder API",
@@ -53,9 +56,37 @@ def find_images(product: str, product_code: Optional[str] = None, brand_site: Op
     # sort by confidence_score highest first
     results.sort(key=lambda x: x.confidence_score, reverse=True)
 
+    # if no results or best score is too low, auto-generate
+    if not results or results[0].confidence_score < GENERATE_THRESHOLD:
+        image_url = generate_image(product, product_code)
+        results.insert(0, ImageResult(
+            image_url=image_url,
+            source_url=None,
+            title=f"{product} — AI generated",
+            confidence_score=1.0,
+            is_generated=True
+        ))
+
     # return as SearchResponse
     return SearchResponse(
         product=product,
         product_code=product_code,
         results=results
+    )
+
+
+@app.get("/generate-image", response_model=SearchResponse)
+def generate(product: str, product_code: Optional[str] = None):
+    # manual trigger — always generates regardless of search results
+    image_url = generate_image(product, product_code)
+    return SearchResponse(
+        product=product,
+        product_code=product_code,
+        results=[ImageResult(
+            image_url=image_url,
+            source_url=None,
+            title=f"{product} — AI generated",
+            confidence_score=1.0,
+            is_generated=True
+        )]
     )
