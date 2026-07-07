@@ -14,7 +14,6 @@ app = FastAPI(
     version="0.1.0"
 )
 
-
 # health check — confirms the API is running
 @app.get("/")
 def home():
@@ -79,14 +78,11 @@ def find_images(product: str, product_code: Optional[str] = None, brand_site: Op
 def generate(
     product: str,
     product_code: Optional[str] = None,
-    # TODO: accept reference_image_url as optional query param
-    # TODO: caller (app.py) should pass the best-scored image_url from previous /find-images results
-    # TODO: forward reference_image_url to generate_image() for img2img mode
+    reference_image_url: Optional[str] = None  # best-scored real image from a previous search
 ):
-    # manual trigger — always generates regardless of search results
+    # manual trigger — always generates, uses reference image if provided for img2img
     try:
-        image_url = generate_image(product, product_code)
-        # TODO: replace above with: generate_image(product, product_code, reference_image_url)
+        image_url = generate_image(product, product_code, reference_image_url)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

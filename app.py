@@ -44,17 +44,23 @@ if "results" in st.session_state:
 
     # generate button only appears if user said no
     if st.session_state.get("satisfied") is False:
-        if st.button("generate with AI", use_container_width=True):
+        if st.button("generate with AI ✨", use_container_width=True):
             with st.spinner("generating with AI..."):
                 params = {"product": st.session_state["product"]}
                 if st.session_state.get("product_code"):
                     params["product_code"] = st.session_state["product_code"]
+
+                # pass the best real image as reference for img2img
+                real_results = [r for r in st.session_state.get("results", []) if not r.get("is_generated")]
+                if real_results:
+                    params["reference_image_url"] = real_results[0]["image_url"]
+
                 response = requests.get(f"{API_URL}/generate-image", params=params)
                 if response.status_code == 200:
                     data = response.json()
                     generated = data.get("results", [])
                     if generated:
-                        st.caption("AI generated")
+                        st.caption("🤖 AI generated (based on real product reference)")
                         st.image(generated[0]["image_url"], width=500)
                 else:
                     st.error(f"generation failed: {response.status_code}")

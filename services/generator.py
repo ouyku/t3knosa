@@ -25,19 +25,20 @@ def build_prompt(product: str, product_code: Optional[str] = None) -> str:
 def generate_image(
     product: str,
     product_code: Optional[str] = None,
-    reference_image_url: Optional[str] = None  # TODO: pass the best-scored real image from find-images as reference
+    reference_image_url: Optional[str] = None  # best-scored real image from find-images
 ) -> str:
     prompt = build_prompt(product, product_code)
     encoded = quote(prompt)
 
-    # TODO: if reference_image_url is provided, switch to image-to-image mode:
-    #   - encode reference_image_url and pass as ?image= param to Pollinations
-    #   - this lets the model see the actual product before generating
-    #   - example: url = f"{POLLINATIONS_URL}/{encoded}?image={quote(reference_image_url)}&model=flux-dev&width=512&height=512&nologo=true"
-    #   - result will look much closer to the real product
+    if reference_image_url:
+        # img2img mode — model sees the real product before generating
+        encoded_ref = quote(reference_image_url)
+        url = f"{POLLINATIONS_URL}/{encoded}?model=flux-dev&image={encoded_ref}&width=512&height=512&nologo=true"
+    else:
+        # text-only fallback — used when no reference image is available
+        url = f"{POLLINATIONS_URL}/{encoded}?width=512&height=512&nologo=true"
 
-    url = f"{POLLINATIONS_URL}/{encoded}?width=512&height=512&nologo=true"
-    response = requests.get(url, timeout=60)
+    response = requests.get(url, timeout=90)
 
     if response.status_code != 200:
         raise Exception(f"Pollinations API error: {response.status_code}")
@@ -46,5 +47,4 @@ def generate_image(
     b64 = base64.b64encode(image_bytes).decode()
     return f"data:image/jpeg;base64,{b64}"
 
-    # TODO: add error handling if generation fails
     # TODO: optionally save generated image to disk or cloud storage
