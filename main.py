@@ -76,10 +76,17 @@ def find_images(product: str, product_code: Optional[str] = None, brand_site: Op
 
 
 @app.get("/generate-image", response_model=SearchResponse)
-def generate(product: str, product_code: Optional[str] = None):
+def generate(
+    product: str,
+    product_code: Optional[str] = None,
+    # TODO: accept reference_image_url as optional query param
+    # TODO: caller (app.py) should pass the best-scored image_url from previous /find-images results
+    # TODO: forward reference_image_url to generate_image() for img2img mode
+):
     # manual trigger — always generates regardless of search results
     try:
         image_url = generate_image(product, product_code)
+        # TODO: replace above with: generate_image(product, product_code, reference_image_url)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

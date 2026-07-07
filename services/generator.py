@@ -22,9 +22,19 @@ def build_prompt(product: str, product_code: Optional[str] = None) -> str:
     # TODO: refine prompt based on product category (electronics, clothing, food etc.)
 
 
-def generate_image(product: str, product_code: Optional[str] = None) -> str:
+def generate_image(
+    product: str,
+    product_code: Optional[str] = None,
+    reference_image_url: Optional[str] = None  # TODO: pass the best-scored real image from find-images as reference
+) -> str:
     prompt = build_prompt(product, product_code)
     encoded = quote(prompt)
+
+    # TODO: if reference_image_url is provided, switch to image-to-image mode:
+    #   - encode reference_image_url and pass as ?image= param to Pollinations
+    #   - this lets the model see the actual product before generating
+    #   - example: url = f"{POLLINATIONS_URL}/{encoded}?image={quote(reference_image_url)}&model=flux-dev&width=512&height=512&nologo=true"
+    #   - result will look much closer to the real product
 
     url = f"{POLLINATIONS_URL}/{encoded}?width=512&height=512&nologo=true"
     response = requests.get(url, timeout=60)
@@ -35,5 +45,6 @@ def generate_image(product: str, product_code: Optional[str] = None) -> str:
     image_bytes = response.content
     b64 = base64.b64encode(image_bytes).decode()
     return f"data:image/jpeg;base64,{b64}"
+
     # TODO: add error handling if generation fails
     # TODO: optionally save generated image to disk or cloud storage
