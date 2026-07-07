@@ -4,9 +4,19 @@ import requests
 from urllib.parse import quote
 from typing import Optional
 from dotenv import load_dotenv
+from google import genai
+from google.genai import types
 
 load_dotenv()
 
+PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
+LOCATION = "global"
+MODEL_ID = "gemini-3.1-flash-lite-image"
+
+# enterprise=True uses GCP project credits (Agent Platform)
+client = genai.Client(enterprise=True, project=PROJECT_ID, location=LOCATION)
+
+# fallback: pollinations for text-only generation
 POLLINATIONS_URL = "https://image.pollinations.ai/prompt"
 
 
@@ -25,26 +35,58 @@ def build_prompt(product: str, product_code: Optional[str] = None) -> str:
 def generate_image(
     product: str,
     product_code: Optional[str] = None,
-    reference_image_url: Optional[str] = None  # best-scored real image from find-images
+    reference_image_url: Optional[str] = None
 ) -> str:
     prompt = build_prompt(product, product_code)
-    encoded = quote(prompt)
 
-    if reference_image_url:
-        # img2img mode — model sees the real product before generating
-        encoded_ref = quote(reference_image_url)
-        url = f"{POLLINATIONS_URL}/{encoded}?model=flux-dev&image={encoded_ref}&width=512&height=512&nologo=true"
-    else:
-        # text-only fallback — used when no reference image is available
+    try:
+        if reference_image_url:
+            # img2img mode — download reference and pass as input image
+            ref_response = requests.get(reference_image_url, timeout=15)
+            ref_response.raise_for_status()
+            b64_ref = base64.b64encode(ref_response.content).decode()
+
+            edit_prompt = (
+                f"This is a product image. Make it a professional studio product photo: "
+                "pure white background, soft studio lighting, sharp focus, no text, "
+                "no watermarks, no shadows. Keep the product exactly as it is, only clean up the background and lighting."
+            )
+
+            contents = [
+                types.Part(inline_data=types.Blob(
+                    mime_type="image/jpeg",
+                    data=base64.b64decode(b64_ref)
+                )),
+                types.Part(text=edit_prompt)
+            ]
+        else:
+            contents = [types.Part(text=prompt)]
+
+        response = client.models.generate_content(
+            model=MODEL_ID,
+            contents=contents,
+            config=types.GenerateContentConfig(
+                response_modalities=["IMAGE", "TEXT"]
+            )
+        )
+
+        for part in response.candidates[0].content.parts:
+            if part.inline_data is not None:
+                image_bytes = part.inline_data.data
+                b64 = base64.b64encode(image_bytes).decode()
+                return f"data:image/png;base64,{b64}"
+
+        raise Exception("no image in response")
+
+    except Exception as e:
+        # fallback to Pollinations if Gemini Enterprise fails
+        print(f"Gemini Enterprise failed, falling back to Pollinations: {e}")
+        encoded = quote(prompt)
         url = f"{POLLINATIONS_URL}/{encoded}?width=512&height=512&nologo=true"
-
-    response = requests.get(url, timeout=90)
-
-    if response.status_code != 200:
-        raise Exception(f"Pollinations API error: {response.status_code}")
-
-    image_bytes = response.content
-    b64 = base64.b64encode(image_bytes).decode()
-    return f"data:image/jpeg;base64,{b64}"
+        resp = requests.get(url, timeout=90)
+        if resp.status_code != 200:
+            raise Exception(f"All generation methods failed. Last error: {e}")
+        b64 = base64.b64encode(resp.content).decode()
+        return f"data:image/jpeg;base64,{b64}"
 
     # TODO: optionally save generated image to disk or cloud storage
