@@ -3,7 +3,7 @@ from typing import Optional # bc product code might not exist
 
 # scoring if the product is correctly identified or not
 def score_result(title: str, product: str, product_code: Optional[str] = None) -> float:
-    score = 0.0
+    score = 0
     title_lower = title.lower()
     product_lower = product.lower()
 
@@ -35,6 +35,6 @@ def score_result(title: str, product: str, product_code: Optional[str] = None) -
         if word in title_lower:
             score -= 0.1
 
-    # keep score between 0.0 and 1.0
-    return round(min(max(score, 0.0), 1.0), 2)
+    # keep score between 0 and 1
+    return round(min(max(score, 0), 1), 2)
 

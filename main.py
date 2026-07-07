@@ -10,8 +10,7 @@ GENERATE_THRESHOLD = 0.3  # auto-generate if best score is below this
 
 app = FastAPI(
     title="T3knosa — product image finder API",
-    description="find exact product image urls by product name and optional code.",
-    version="0.1.0"
+    description="find exact product image urls by product name and optional code."
 )
 
 # health check — confirms the API is running

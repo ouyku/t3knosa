@@ -44,7 +44,7 @@ if "results" in st.session_state:
 
     # generate button only appears if user said no
     if st.session_state.get("satisfied") is False:
-        if st.button("generate with AI ✨", use_container_width=True):
+        if st.button("generate with AI", use_container_width=True):
             with st.spinner("generating with AI..."):
                 params = {"product": st.session_state["product"]}
                 if st.session_state.get("product_code"):
@@ -60,7 +60,7 @@ if "results" in st.session_state:
                     data = response.json()
                     generated = data.get("results", [])
                     if generated:
-                        st.caption("🤖 AI generated (based on real product reference)")
+                        st.caption("AI generated")
                         st.image(generated[0]["image_url"], width=500)
                 else:
                     st.error(f"generation failed: {response.status_code}")

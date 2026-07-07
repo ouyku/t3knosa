@@ -11,3 +11,7 @@
 
 **tried**
 - google custom search api - did not work
+
+# image generation
+
+- pollinations - very basic url prompt to image
