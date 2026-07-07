@@ -35,6 +35,14 @@ def score_result(title: str, product: str, product_code: Optional[str] = None) -
         if word in title_lower:
             score -= 0.1
 
+    # penalize if numbers in query don't appear in title
+    # model numbers are critical — "2220" and "2101" are completely different products
+    import re
+    query_numbers = re.findall(r'\d+', product_lower)
+    for num in query_numbers:
+        if num not in title_lower:
+            score -= 0.5  # strong penalty for wrong model number
+
     # keep score between 0 and 1
     return round(min(max(score, 0), 1), 2)
 
