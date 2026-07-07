@@ -47,9 +47,10 @@ def generate_image(
             b64_ref = base64.b64encode(ref_response.content).decode()
 
             edit_prompt = (
-                f"This is a product image. Make it a professional studio product photo: "
-                "pure white background, soft studio lighting, sharp focus, no text, "
-                "no watermarks, no shadows. Keep the product exactly as it is, only clean up the background and lighting."
+                f"This is a product image. Generate a NEW studio photo of the SAME product "
+                "from a completely different angle or perspective. "
+                "Pure white background, soft studio lighting, sharp focus, "
+                "professional commercial photography. No text, no watermarks, no shadows."
             )
 
             contents = [
