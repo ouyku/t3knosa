@@ -47,8 +47,10 @@ def generate_image(
             b64_ref = base64.b64encode(ref_response.content).decode()
 
             edit_prompt = (
-                f"This is a product image. Generate a NEW studio photo of the SAME product "
+                "This is a product image. Generate a NEW studio photo of the SAME product "
                 "from a completely different angle or perspective. "
+                "IMPORTANT: Do NOT add, remove, or change any physical parts of the product. "
+                "The product must have exactly the same components as in the reference image. "
                 "Pure white background, soft studio lighting, sharp focus, "
                 "professional commercial photography. No text, no watermarks, no shadows."
             )
@@ -67,7 +69,8 @@ def generate_image(
             model=MODEL_ID,
             contents=contents,
             config=types.GenerateContentConfig(
-                response_modalities=["IMAGE", "TEXT"]
+                response_modalities=["IMAGE", "TEXT"],
+                thinking_config=types.ThinkingConfig(thinking_budget=1024)  # high thinking
             )
         )
 
