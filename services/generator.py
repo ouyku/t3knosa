@@ -1,15 +1,13 @@
 import os
 import base64
+import requests
+from urllib.parse import quote
 from typing import Optional
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
 
 load_dotenv()
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
-client = genai.Client(api_key=GEMINI_API_KEY)
+POLLINATIONS_URL = "https://image.pollinations.ai/prompt"
 
 
 def build_prompt(product: str, product_code: Optional[str] = None) -> str:
@@ -26,17 +24,16 @@ def build_prompt(product: str, product_code: Optional[str] = None) -> str:
 
 def generate_image(product: str, product_code: Optional[str] = None) -> str:
     prompt = build_prompt(product, product_code)
+    encoded = quote(prompt)
 
-    response = client.models.generate_images(
-        model="imagen-3.0-generate-002",
-        prompt=prompt,
-        config=types.GenerateImagesConfig(number_of_images=1)
-    )
+    url = f"{POLLINATIONS_URL}/{encoded}?width=512&height=512&nologo=true"
+    response = requests.get(url, timeout=60)
 
-    image_bytes = response.generated_images[0].image.image_bytes
+    if response.status_code != 200:
+        raise Exception(f"Pollinations API error: {response.status_code}")
 
-    # encode as base64 data url so it can be used directly as image src
+    image_bytes = response.content
     b64 = base64.b64encode(image_bytes).decode()
-    return f"data:image/png;base64,{b64}"
+    return f"data:image/jpeg;base64,{b64}"
     # TODO: add error handling if generation fails
     # TODO: optionally save generated image to disk or cloud storage

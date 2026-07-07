@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from typing import Optional
 from services.query_builder import build_queries
 from services.searcher import search_images
@@ -78,7 +78,11 @@ def find_images(product: str, product_code: Optional[str] = None, brand_site: Op
 @app.get("/generate-image", response_model=SearchResponse)
 def generate(product: str, product_code: Optional[str] = None):
     # manual trigger — always generates regardless of search results
-    image_url = generate_image(product, product_code)
+    try:
+        image_url = generate_image(product, product_code)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
     return SearchResponse(
         product=product,
         product_code=product_code,
