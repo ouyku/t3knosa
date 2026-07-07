@@ -50,11 +50,8 @@ if "results" in st.session_state:
                 if st.session_state.get("product_code"):
                     params["product_code"] = st.session_state["product_code"]
 
-                # pass the best real image as reference for img2img
-                real_results = [r for r in st.session_state.get("results", []) if not r.get("is_generated")]
-                if real_results:
-                    params["reference_image_url"] = real_results[0]["image_url"]
-
+                # no reference image — model generates freely from product name
+                # passing reference caused model to just copy the existing photo
                 response = requests.get(f"{API_URL}/generate-image", params=params)
                 if response.status_code == 200:
                     data = response.json()

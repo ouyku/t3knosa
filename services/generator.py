@@ -11,7 +11,7 @@ load_dotenv()
 
 PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
 LOCATION = "global"
-MODEL_ID = "gemini-3.1-flash-lite-image"
+MODEL_ID = "gemini-3.1-flash-image"
 
 # enterprise=True uses GCP project credits (Agent Platform)
 client = genai.Client(enterprise=True, project=PROJECT_ID, location=LOCATION)
