@@ -13,9 +13,12 @@ def score_result(title: str, product: str, product_code: Optional[str] = None) -
     matches = sum(1 for word in product_words if word in title_lower)
     score += matches / len(product_words)
 
-    # product code is a strong signal — very specific so +0.4
-    if product_code and product_code.lower() in title_lower:
-        score += 0.4
+    # product code is a strong signal — very specific so +0.4 if found, -0.6 if missing
+    if product_code:
+        if product_code.lower() in title_lower:
+            score += 0.4
+        else:
+            score -= 0.6  # wrong model number — strong penalty
 
     # add positive signs
     positive = ["official", "press", "product photo", "spec", "authentic"]
