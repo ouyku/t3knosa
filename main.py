@@ -4,6 +4,7 @@ from services.query_builder import build_queries
 from services.searcher import search_images
 from services.matcher import score_result
 from services.generator import generate_image
+from services.translator import translate_to_english
 from models.schemas import SearchResponse, ImageResult
 
 GENERATE_THRESHOLD = 0.3  # auto-generate if best score is below this
@@ -26,7 +27,16 @@ def queries(product: str, product_code: Optional[str] = None, brand_site: Option
 
 @app.get("/find-images", response_model=SearchResponse)
 def find_images(product: str, product_code: Optional[str] = None, brand_site: Optional[str] = None):
-    queries = build_queries(product, product_code, brand_site)
+    # translate to English for better image search coverage
+    product_en = translate_to_english(product)
+    if product_en.lower() != product.lower():
+        print(f"Translated: '{product}' → '{product_en}'")
+
+    # build queries using English translation
+    queries = build_queries(product_en, product_code, brand_site)
+    # also search with original term for local/regional results
+    if product_en.lower() != product.lower():
+        queries += build_queries(product, product_code, brand_site)
 
     # call search_images for each query and collect results
     raw_results = []
@@ -41,14 +51,18 @@ def find_images(product: str, product_code: Optional[str] = None, brand_site: Op
             seen.add(item["image_url"])
             unique_results.append(item)
 
-    # score each result and build ImageResult objects
+    # score each result — score against both original and english name
     results = []
     for item in unique_results:
+        score = max(
+            score_result(item["title"], product, product_code),
+            score_result(item["title"], product_en, product_code)
+        )
         results.append(ImageResult(
             image_url=item["image_url"],
             source_url=item["source_url"],
             title=item["title"],
-            confidence_score=score_result(item["title"], product, product_code)
+            confidence_score=score
         ))
 
     # sort by confidence_score highest first
