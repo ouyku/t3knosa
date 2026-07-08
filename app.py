@@ -42,16 +42,27 @@ if "results" in st.session_state:
         if st.button("no", use_container_width=True):
             st.session_state["satisfied"] = False
 
-    # generate button only appears if user said no
+    # generate buttons only appear if user said no
     if st.session_state.get("satisfied") is False:
-        if st.button("generate with AI", use_container_width=True):
-            with st.spinner("generating with AI..."):
-                params = {"product": st.session_state["product"]}
+        gen_col1, gen_col2 = st.columns(2)
+        with gen_col1:
+            catalog_clicked = st.button("catalog photo", use_container_width=True)
+        with gen_col2:
+            lifestyle_clicked = st.button("lifestyle photo", use_container_width=True)
+
+        style = None
+        if catalog_clicked:
+            style = "catalog"
+        elif lifestyle_clicked:
+            style = "lifestyle"
+
+        if style:
+            with st.spinner(f"generating {style} photo..."):
+                params = {"product": st.session_state["product"], "style": style}
                 if st.session_state.get("product_code"):
                     params["product_code"] = st.session_state["product_code"]
 
-                # only use reference image if score is 1.0 — confirms correct product
-                # low-score references produce wrong generations
+                # only use reference if score >= 0.9
                 real_results = [r for r in st.session_state.get("results", []) if not r.get("is_generated")]
                 if real_results and real_results[0]["confidence_score"] >= 0.9:
                     params["reference_image_url"] = real_results[0]["image_url"]
@@ -61,10 +72,11 @@ if "results" in st.session_state:
                     data = response.json()
                     generated = data.get("results", [])
                     if generated:
-                        st.caption("AI generated")
+                        st.caption(f"AI generated — {style}")
                         st.image(generated[0]["image_url"], width=500)
                 else:
                     st.error(f"generation failed: {response.status_code}")
+
 
 # show results below
 if "results" in st.session_state and st.session_state["results"]:

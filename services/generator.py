@@ -20,8 +20,18 @@ client = genai.Client(enterprise=True, project=PROJECT_ID, location=LOCATION)
 POLLINATIONS_URL = "https://image.pollinations.ai/prompt"
 
 
-def build_prompt(product: str, product_code: Optional[str] = None) -> str:
+def build_prompt(product: str, product_code: Optional[str] = None, style: str = "catalog") -> str:
     name = f"{product} {product_code}" if product_code else product
+
+    if style == "lifestyle":
+        return (
+            f"Lifestyle photo of {name} being used in everyday life. "
+            "Natural indoor or outdoor setting, warm ambient lighting, realistic environment. "
+            "Show the product in context — someone using it, or placed naturally in a room or scene. "
+            "Candid, authentic feel. No studio backgrounds. No text, no watermarks."
+        )
+
+    # default: catalog style
     return (
         f"Professional studio product photograph of {name}. "
         "Pure white background, soft even studio lighting, sharp focus, "
@@ -29,15 +39,14 @@ def build_prompt(product: str, product_code: Optional[str] = None) -> str:
         "Show the product clearly from a slight front angle. "
         "No text, no logos, no watermarks, no people, no shadows."
     )
-    # TODO: refine prompt based on product category (electronics, clothing, food etc.)
-
 
 def generate_image(
     product: str,
     product_code: Optional[str] = None,
-    reference_image_url: Optional[str] = None
+    reference_image_url: Optional[str] = None,
+    style: str = "catalog"  # "catalog" or "lifestyle"
 ) -> str:
-    prompt = build_prompt(product, product_code)
+    prompt = build_prompt(product, product_code, style)
 
     try:
         if reference_image_url:
@@ -70,7 +79,7 @@ def generate_image(
             contents=contents,
             config=types.GenerateContentConfig(
                 response_modalities=["IMAGE", "TEXT"],
-                thinking_config=types.ThinkingConfig(thinking_budget=1024)  # high thinking
+                thinking_config=types.ThinkingConfig(thinking_budget=1024)  # high thinking so it's more accurate
             )
         )
 
@@ -83,8 +92,8 @@ def generate_image(
         raise Exception("no image in response")
 
     except Exception as e:
-        # fallback to Pollinations if Gemini Enterprise fails
-        print(f"Gemini Enterprise failed, falling back to Pollinations: {e}")
+        # fallback to Pollinations if Gemini fails
+        print(f"Gemini failed, falling back to Pollinations: {e}")
         encoded = quote(prompt)
         url = f"{POLLINATIONS_URL}/{encoded}?width=512&height=512&nologo=true"
         resp = requests.get(url, timeout=90)

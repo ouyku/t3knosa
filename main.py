@@ -77,11 +77,12 @@ def find_images(product: str, product_code: Optional[str] = None, brand_site: Op
 def generate(
     product: str,
     product_code: Optional[str] = None,
-    reference_image_url: Optional[str] = None  # best-scored real image from a previous search
+    reference_image_url: Optional[str] = None,
+    style: str = "catalog"  # "catalog" or "lifestyle"
 ):
     # manual trigger — always generates, uses reference image if provided for img2img
     try:
-        image_url = generate_image(product, product_code, reference_image_url)
+        image_url = generate_image(product, product_code, reference_image_url, style)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -91,7 +92,7 @@ def generate(
         results=[ImageResult(
             image_url=image_url,
             source_url=None,
-            title=f"{product} — AI generated",
+            title=f"{product} — AI generated ({style})",
             confidence_score=1.0,
             is_generated=True
         )]
