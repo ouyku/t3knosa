@@ -46,9 +46,9 @@ if "results" in st.session_state:
     if st.session_state.get("satisfied") is False:
         gen_col1, gen_col2 = st.columns(2)
         with gen_col1:
-            catalog_clicked = st.button("catalog photo", use_container_width=True)
+            catalog_clicked = st.button("generate a catalog photo", use_container_width=True)
         with gen_col2:
-            lifestyle_clicked = st.button("lifestyle photo", use_container_width=True)
+            lifestyle_clicked = st.button("generate a lifestyle photo", use_container_width=True)
 
         style = None
         if catalog_clicked:

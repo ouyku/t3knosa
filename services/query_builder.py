@@ -8,7 +8,6 @@ def build_queries(
 ) -> List[str]:
     if product_code:
         # lead with model code — most specific identifier, avoids brand name ambiguity
-        # e.g. "piranha" could be a fish, but "2220 piranha" is clearly a product
         queries = [
             f'"{product_code}" {product} product photo',
             f'"{product_code}" {product} official image',

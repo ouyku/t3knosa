@@ -14,4 +14,5 @@
 
 # image generation
 
-- pollinations - very basic url prompt to image
+- google gemini - use for image-to-image (img2img)
+- **fallback:** pollinations - very basic url prompt to image
